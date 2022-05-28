@@ -1,15 +1,18 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import bodyParser from 'body-parser';
-import {filterImageFromURL, deleteLocalFiles} from './util/util';
+import { filterImageFromURL, deleteLocalFiles } from './util/util';
 
 (async () => {
-
   // Init the Express application
   const app = express();
-
-  // Set the network port
+  // const UrlPattern = require('url-pattern');
+  // const pattern = new UrlPattern('');
+  // const pattern = new UrlPattern(
+  //   '[http[s]!://][$sub_domain.]$domain.$toplevel-domain[/?]'
+  // );
+  // Set the network por
   const port = process.env.PORT || 8082;
-  
+
   // Use the body parser middleware for post requests
   app.use(bodyParser.json());
 
@@ -28,19 +31,49 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
   //   the filtered image file [!!TIP res.sendFile(filteredpath); might be useful]
 
   /**************************************************************************** */
+  app.use('/filteredimage', async (req: Request, resp: Response) => {
+    const image_url: string = req.query.image_url;
 
-  //! END @TODO1
-  
+    try {
+      console.log('TRY REACHED');
+      // check image_url is in query param
+      if (!image_url) {
+        return resp.status(400).json({
+          errorCode: 400,
+          message: 'URL is missing. Please provide a valid image url.',
+        });
+      }
+
+      // filter the image
+      const filterImagePath: string = await filterImageFromURL(image_url);
+      resp.sendFile(filterImagePath, (err) => {
+        if (err) {
+          return resp.status(503).json({
+            errorCode: 503,
+            message:
+              'Something went wrong while processing your request. Please try again later.',
+          });
+        }
+        // delete the filter image from tmp directory
+        deleteLocalFiles([filterImagePath]);
+      });
+    } catch (error) {
+      return resp.status(422).json({
+        errorCode: 422,
+        message: 'Image is not processable. Please try with a valid image url.',
+      });
+    }
+  });
+
   // Root Endpoint
   // Displays a simple message to the user
-  app.get( "/", async ( req, res ) => {
-    res.send("try GET /filteredimage?image_url={{}}")
-  } );
-  
+  app.get('/', async (req, res) => {
+    res.send('try GET /filteredimage?image_url={{}}');
+  });
 
   // Start the Server
-  app.listen( port, () => {
-      console.log( `server running http://localhost:${ port }` );
-      console.log( `press CTRL+C to stop server` );
-  } );
+  app.listen(port, () => {
+    console.log(`server running http://localhost:${port}`);
+    console.log(`press CTRL+C to stop server`);
+  });
 })();
