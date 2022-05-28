@@ -5,12 +5,7 @@ import { filterImageFromURL, deleteLocalFiles } from './util/util';
 (async () => {
   // Init the Express application
   const app = express();
-  // const UrlPattern = require('url-pattern');
-  // const pattern = new UrlPattern('');
-  // const pattern = new UrlPattern(
-  //   '[http[s]!://][$sub_domain.]$domain.$toplevel-domain[/?]'
-  // );
-  // Set the network por
+
   const port = process.env.PORT || 8082;
 
   // Use the body parser middleware for post requests
