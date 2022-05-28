@@ -30,7 +30,6 @@ import { filterImageFromURL, deleteLocalFiles } from './util/util';
     const image_url: string = req.query.image_url;
 
     try {
-      console.log('TRY REACHED');
       // check image_url is in query param
       if (!image_url) {
         return resp.status(400).json({
